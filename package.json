@@ -1,13 +1,13 @@
 {
   "name": "thermo-props",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+   "preview": "vite preview --host 0.0.0.0 --port 5000"
   },
   "dependencies": {
     "react": "^19.2.5",
@@ -25,3 +25,4 @@
     "vite": "^8.0.10"
   }
 }
+
