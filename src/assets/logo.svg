@@ -1,0 +1,15 @@
+<svg width="56" height="56" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+    {/*
+    <!-- Контур термометра --> */}
+    <path d="M32 6c-6 0-10 4-10 10v24a12 12 0 1 0 20 0V16c0-6-4-10-10-10z" stroke="currentColor" strokeWidth="4"
+        fill="none" strokeLinecap="round" />
+    {/*
+    <!-- Крапля --> */}
+    <path d="M32 26c-4 6-8 10-8 14a8 8 0 0 0 16 0c0-4-4-8-8-14z" fill="url(#grad)" />
+    <defs>
+        <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#3B82F6" />
+            <stop offset="100%" stopColor="#F59E0B" />
+        </linearGradient>
+    </defs>
+</svg>

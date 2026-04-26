@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../i18n.jsx';
-import * as Water from '../water.js';
+// import * as Water from '../substances/water/water.js';
 
 const CHART_PROPS = [
   { key: 'rho',    sym: 'ρ',  tkey: 'prop.density', ukey: 'unit.density' },
@@ -72,10 +72,10 @@ function buildChartData(propKey, pMPa) {
     const T = Tmin + (Tmax - Tmin) * i / N;
     let d;
     try {
-      const ph = Water.phase(T, pMPa);
-      d = ph === 'ice'   ? Water.computeIce(T, pMPa)
-        : ph === 'steam' ? Water.computeSteam(T, pMPa)
-                         : Water.compute(T, pMPa);
+      const ph = thermo.phase(T, pMPa);
+      d = ph === 'ice'   ? thermo.computeIce(T, pMPa)
+        : ph === 'steam' ? thermo.computeSteam(T, pMPa)
+                         : thermo.compute(T, pMPa);
       const v = d[propKey];
       if (!isFinite(v) || v == null) continue;
       const arr = ph === 'ice' ? ice : ph === 'steam' ? stm : liq;
@@ -117,7 +117,7 @@ function pathFor(pts, ty) {
   return pts.map((p, i) => (i ? 'L' : 'M') + tx(p[0]).toFixed(1) + ',' + ty(p[1]).toFixed(1)).join(' ');
 }
 
-export default function Chart({ result }) {
+export default function Chart({ result, thermo }) {
   const { t } = useI18n();
   const [propKey, setPropKey] = useState('rho');
   const [hover, setHover] = useState(null);
@@ -125,7 +125,7 @@ export default function Chart({ result }) {
   const svgRef = useRef(null);
 
   const { T: curT, pMPa } = result;
-  const Tsat = useMemo(() => Water.saturationTemp(pMPa), [pMPa]);
+  const Tsat = useMemo(() => thermo.saturationTemp(pMPa), [pMPa]);
 
   const { ice, liq, stm } = useMemo(() => buildChartData(propKey, pMPa), [propKey, pMPa]);
   const scales = useMemo(() => buildScales(ice, liq, stm), [ice, liq, stm]);

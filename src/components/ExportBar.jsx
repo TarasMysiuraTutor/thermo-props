@@ -1,6 +1,6 @@
 import React from 'react';
 import { useI18n } from '../i18n.jsx';
-import * as Water from '../water.js';
+import * as Water from '../substances/water/water.js';
 import { APP_VERSION } from '../version.js';
 
 function csvEscape(v) {

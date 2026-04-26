@@ -1,3 +1,21 @@
+## Project mission
+``
+
+This project is a mobile‑friendly, accessible web platform for thermophysical properties of fluids and solids.
+It prioritizes engineering transparency, clear physical assumptions, and educational value over black‑box precision.
+The platform is designed to scale from H₂O to multiple substances with substance‑specific models and correlations.
+
+
+## Design principles
+``
+
+- Mobile‑first layout with full feature parity
+- Accessible UI (WCAG AA where applicable)
+- SEO‑friendly static content for every substance
+- Transparent physical models and stated limitations
+- No backend: all calculations run client‑side
+
+
 # H₂O Thermo Calc
 
 Веб-калькулятор теплофізичних властивостей води на основі апроксимаційних формул IAPWS-IF97. Підтримує лід Ih, рідку воду та перегріту пару (діапазон −100…800 °C, тиск 0.001–100 МПа).
