@@ -1,0 +1,166 @@
+/* ─────────────────────────────────────────
+   RESULTS
+───────────────────────────────────────── */
+.results-section {
+  display: none;
+}
+
+.results-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.results-temp {
+  font-family: var(--ff-mono);
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 500;
+  color: var(--text-1);
+  letter-spacing: -0.02em;
+}
+
+.results-temp b {
+  color: var(--blue);
+  font-weight: 500;
+}
+
+.results-temp span {
+  font-size: 1em;
+  color: var(--text-3);
+}
+
+/* Phase tag */
+.phase-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-family: var(--ff-mono);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.phase-tag::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.phase-water {
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-border);
+  color: var(--blue);
+}
+.phase-steam {
+  background: var(--amber-bg);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: var(--amber);
+}
+.phase-ice {
+  background: rgba(147, 210, 255, 0.1);
+  border: 1px solid rgba(147, 210, 255, 0.25);
+  color: #93d2ff;
+}
+
+.phase-gas {
+  background: #334155;
+  color: #e5e7eb;
+}
+
+/* ─────────────────────────────────────────
+   PROPERTIES GRID
+───────────────────────────────────────── */
+.props-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Individual property card */
+.prop-cell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  transition:
+    border-color 160ms,
+    background 160ms,
+    transform 160ms;
+  animation: fadeUp 0.35s ease both;
+  cursor: default;
+}
+
+.prop-cell:hover {
+  border-color: var(--blue-border);
+  background: var(--surface-2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.prop-cell-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.prop-num {
+  font-family: var(--ff-mono);
+  font-size: 16px;
+  color: var(--text-4);
+  letter-spacing: 0.08em;
+}
+
+.prop-symbol {
+  font-family: var(--ff-mono);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--blue);
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-border);
+  border-radius: 5px;
+  padding: 2px 9px;
+  line-height: 1.5;
+}
+
+.prop-name {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-2);
+  line-height: 1.4;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+.prop-value-wrap {
+  border-top: 1px solid var(--border);
+  padding-top: 13px;
+  margin-top: auto;
+}
+
+.prop-value {
+  font-family: var(--ff-mono);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-1);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  word-break: break-all;
+}
+
+.prop-unit {
+  font-family: var(--ff-mono);
+  font-size: 18px;
+  color: var(--text-3);
+  margin-top: 5px;
+  letter-spacing: 0.04em;
+}

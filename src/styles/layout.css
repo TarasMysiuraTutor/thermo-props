@@ -1,0 +1,20 @@
+/* ─────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────── */
+.page-wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+main.main-content {
+  flex: 1;
+  padding: 0px 0 64px;
+}

@@ -1,0 +1,82 @@
+/* ─────────────────────────────────────────
+   HISTORY
+───────────────────────────────────────── */
+.history-card {
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.history-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.history-clear {
+  background: transparent;
+  border: 0;
+  color: var(--text-3);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition:
+    color 0.15s,
+    background-color 0.15s;
+}
+.history-clear:hover {
+  color: var(--red);
+  background: var(--red-bg);
+}
+.history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.history-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-lt);
+  color: var(--text-2);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    transform 0.05s;
+}
+.history-chip:hover {
+  background: var(--blue-bg);
+  border-color: var(--blue-border);
+  color: var(--blue);
+}
+.history-chip:active {
+  transform: translateY(1px);
+}
+.hc-val {
+  font-family: var(--ff-mono);
+  font-weight: 500;
+}
+.hc-unit {
+  color: var(--text-3);
+  font-size: 11px;
+}
+.history-chip:hover .hc-unit {
+  color: var(--blue);
+}

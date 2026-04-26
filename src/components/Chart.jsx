@@ -1,17 +1,17 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useI18n } from '../i18n.jsx';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "../i18n.jsx";
 // import * as Water from '../substances/water/water.js';
 
 const CHART_PROPS = [
-  { key: 'rho',    sym: 'ρ',  tkey: 'prop.density', ukey: 'unit.density' },
-  { key: 'cp',     sym: 'cₚ', tkey: 'prop.cp',      ukey: 'unit.cp' },
-  { key: 'lambda', sym: 'λ',  tkey: 'prop.lambda',  ukey: 'unit.lambda' },
-  { key: 'mu',     sym: 'μ',  tkey: 'prop.mu',      ukey: 'unit.mu' },
-  { key: 'nu',     sym: 'ν',  tkey: 'prop.nu',      ukey: 'unit.nu' },
-  { key: 'a',      sym: 'a',  tkey: 'prop.a',       ukey: 'unit.a' },
-  { key: 'Pr',     sym: 'Pr', tkey: 'prop.Pr',      ukey: 'unit.Pr' },
-  { key: 'beta',   sym: 'β',  tkey: 'prop.beta',    ukey: 'unit.beta' },
-  { key: 'h',      sym: 'h',  tkey: 'prop.h',       ukey: 'unit.h' },
+  { key: "rho", sym: "ρ", tkey: "prop.density", ukey: "unit.density" },
+  { key: "cp", sym: "cₚ", tkey: "prop.cp", ukey: "unit.cp" },
+  { key: "lambda", sym: "λ", tkey: "prop.lambda", ukey: "unit.lambda" },
+  { key: "mu", sym: "μ", tkey: "prop.mu", ukey: "unit.mu" },
+  { key: "nu", sym: "ν", tkey: "prop.nu", ukey: "unit.nu" },
+  { key: "a", sym: "a", tkey: "prop.a", ukey: "unit.a" },
+  { key: "Pr", sym: "Pr", tkey: "prop.Pr", ukey: "unit.Pr" },
+  { key: "beta", sym: "β", tkey: "prop.beta", ukey: "unit.beta" },
+  { key: "h", sym: "h", tkey: "prop.h", ukey: "unit.h" },
 ];
 
 function linearTicks(min, max, n) {
@@ -43,53 +43,79 @@ function logTicks(min, max) {
 
 function fmtTick(v) {
   const a = Math.abs(v);
-  if (a === 0) return '0';
-  if (a >= 10000 || a < 0.01) return v.toExponential(0).replace('+', '');
+  if (a === 0) return "0";
+  if (a >= 10000 || a < 0.01) return v.toExponential(0).replace("+", "");
   if (a >= 100) return v.toFixed(0);
-  if (a >= 10)  return v.toFixed(1);
-  if (a >= 1)   return v.toFixed(2);
+  if (a >= 10) return v.toFixed(1);
+  if (a >= 1) return v.toFixed(2);
   return v.toPrecision(2);
 }
 
 function fmtTooltipVal(v) {
   const a = Math.abs(v);
-  if (a === 0) return '0';
+  if (a === 0) return "0";
   if (a >= 10000 || a < 0.001) return v.toExponential(3);
   if (a >= 1000) return v.toFixed(1);
-  if (a >= 10)   return v.toFixed(2);
-  if (a >= 1)    return v.toFixed(3);
+  if (a >= 10) return v.toFixed(2);
+  if (a >= 1) return v.toFixed(3);
   return v.toPrecision(4);
 }
 
-const W = 720, H = 320, PL = 64, PR = 18, PT = 22, PB = 44;
+const W = 720,
+  H = 320,
+  PL = 64,
+  PR = 18,
+  PT = 22,
+  PB = 44;
 const PW = W - PL - PR;
 const PH = H - PT - PB;
-const Tmin = -100, Tmax = 800, N = 360;
+const Tmin = -100,
+  Tmax = 800,
+  N = 360;
 
-function buildChartData(propKey, pMPa) {
-  const ice = [], liq = [], stm = [];
+function buildChartData(thermo, propKey, pMPa, isSinglePhase) {
+  const ice = [],
+    liq = [],
+    stm = [];
+
   for (let i = 0; i <= N; i++) {
-    const T = Tmin + (Tmax - Tmin) * i / N;
-    let d;
+    const T = Tmin + ((Tmax - Tmin) * i) / N;
     try {
       const ph = thermo.phase(T, pMPa);
-      d = ph === 'ice'   ? thermo.computeIce(T, pMPa)
-        : ph === 'steam' ? thermo.computeSteam(T, pMPa)
-                         : thermo.compute(T, pMPa);
-      const v = d[propKey];
-      if (!isFinite(v) || v == null) continue;
-      const arr = ph === 'ice' ? ice : ph === 'steam' ? stm : liq;
-      arr.push([T, v]);
-    } catch (_) { /* skip */ }
+      const d =
+        ph === "ice"
+          ? thermo.computeIce(T, pMPa)
+          : ph === "steam"
+            ? thermo.computeSteam(T, pMPa)
+            : thermo.compute(T, pMPa);
+
+      const v = d?.[propKey];
+      if (!isFinite(v)) continue;
+
+      if (isSinglePhase) {
+        liq.push([T, v]); // ✅ вся крива в один масив
+      } else {
+        const arr = ph === "ice" ? ice : ph === "steam" ? stm : liq;
+        arr.push([T, v]);
+      }
+    } catch (_) {}
   }
+
   return { ice, liq, stm };
 }
 
 function buildScales(ice, liq, stm) {
-  const allV = ice.concat(liq).concat(stm).map((p) => p[1]);
+  const allV = ice
+    .concat(liq)
+    .concat(stm)
+    .map((p) => p[1]);
   if (allV.length < 2) return null;
-  let vmin = Math.min(...allV), vmax = Math.max(...allV);
-  if (vmin === vmax) { vmin -= 1; vmax += 1; }
+  let vmin = Math.min(...allV),
+    vmax = Math.max(...allV);
+  if (vmin === vmax) {
+    vmin -= 1;
+    vmax += 1;
+  }
   const useLog = vmin > 0 && vmax / Math.max(vmin, 1e-12) > 50;
   if (!useLog) {
     const span = vmax - vmin;
@@ -104,48 +130,86 @@ function makeTy(scales) {
   if (useLog) {
     const lmin = Math.log10(Math.max(vmin, 1e-12));
     const lmax = Math.log10(vmax);
-    return (v) => PT + PH - (Math.log10(Math.max(v, 1e-12)) - lmin) / (lmax - lmin) * PH;
+    return (v) =>
+      PT + PH - ((Math.log10(Math.max(v, 1e-12)) - lmin) / (lmax - lmin)) * PH;
   }
-  return (v) => PT + PH - (v - vmin) / (vmax - vmin) * PH;
+  return (v) => PT + PH - ((v - vmin) / (vmax - vmin)) * PH;
 }
 
 function tx(T) {
-  return PL + (T - Tmin) / (Tmax - Tmin) * PW;
+  return PL + ((T - Tmin) / (Tmax - Tmin)) * PW;
 }
 
 function pathFor(pts, ty) {
-  return pts.map((p, i) => (i ? 'L' : 'M') + tx(p[0]).toFixed(1) + ',' + ty(p[1]).toFixed(1)).join(' ');
+  return pts
+    .map(
+      (p, i) =>
+        (i ? "L" : "M") + tx(p[0]).toFixed(1) + "," + ty(p[1]).toFixed(1),
+    )
+    .join(" ");
 }
 
 export default function Chart({ result, thermo }) {
   const { t } = useI18n();
-  const [propKey, setPropKey] = useState('rho');
+  const [propKey, setPropKey] = useState("rho");
   const [hover, setHover] = useState(null);
   const wrapRef = useRef(null);
   const svgRef = useRef(null);
 
   const { T: curT, pMPa } = result;
-  const Tsat = useMemo(() => thermo.saturationTemp(pMPa), [pMPa]);
+  const Tsat = useMemo(() => thermo.saturationTemp(pMPa), [thermo, pMPa]);
+  const Tmelt = useMemo(() => thermo.meltingTemp(pMPa), [thermo, pMPa]);
 
-  const { ice, liq, stm } = useMemo(() => buildChartData(propKey, pMPa), [propKey, pMPa]);
+  const isSinglePhase = useMemo(() => {
+    // Якщо для різних температур фаза завжди одна і та ж → однофазна
+    const p = pMPa;
+    const p1 = thermo.phase(-50, p);
+    const p2 = thermo.phase(100, p);
+    const p3 = thermo.phase(300, p);
+    return p1 === p2 && p2 === p3;
+  }, [thermo, pMPa]);
+
+  const { ice, liq, stm } = useMemo(
+    () => buildChartData(thermo, propKey, pMPa, isSinglePhase),
+    [thermo, propKey, pMPa, isSinglePhase],
+  );
+
   const scales = useMemo(() => buildScales(ice, liq, stm), [ice, liq, stm]);
 
-  if (!scales) {
+  // if (!scales) {
+  //   return (
+  //     <div className="chart-section" style={{ display: "block" }}>
+  //       <div className="chart-head">
+  //         <h3 className="chart-title">{t("chart.title")}</h3>
+  //       </div>
+  //       <div className="chart-wrap" />
+  //     </div>
+  //   );
+  // }
+
+  if (isSinglePhase) {
     return (
-      <div className="chart-section" style={{ display: 'block' }}>
+      <div className="chart-section">
         <div className="chart-head">
-          <h3 className="chart-title">{t('chart.title')}</h3>
+          <h3 className="chart-title">{t("chart.title")}</h3>
         </div>
-        <div className="chart-wrap" />
+
+        <div className="chart-empty">
+          <p className="chart-note">{t("chart.singlePhaseNote")}</p>
+        </div>
       </div>
     );
   }
 
   const ty = makeTy(scales);
   const meta = CHART_PROPS.find((p) => p.key === propKey) || CHART_PROPS[0];
-  const xticks = [-100, -50, 0, 100, 200, 300, 400, 500, 600, 700, 800].filter((v) => v >= Tmin && v <= Tmax);
-  const yticks = scales.useLog ? logTicks(scales.vmin, scales.vmax) : linearTicks(scales.vmin, scales.vmax, 5);
-  const ylab = `${meta.sym}, ${t(meta.ukey)}${scales.useLog ? ' (log)' : ''}`;
+  const xticks = [-100, -50, 0, 100, 200, 300, 400, 500, 600, 700, 800].filter(
+    (v) => v >= Tmin && v <= Tmax,
+  );
+  const yticks = scales.useLog
+    ? logTicks(scales.vmin, scales.vmax)
+    : linearTicks(scales.vmin, scales.vmax, 5);
+  const ylab = `${meta.sym}, ${t(meta.ukey)}${scales.useLog ? " (log)" : ""}`;
 
   function svgPointFromEvent(evt) {
     const svg = svgRef.current;
@@ -163,36 +227,96 @@ export default function Chart({ result, thermo }) {
     if (!e) return;
     const p = svgPointFromEvent(e);
     if (!p) return;
-    const Th = Tmin + (p.x - PL) / PW * (Tmax - Tmin);
-    let best = null, bestDist = Infinity, bestPhase = null;
-    for (const pt of ice) { const d = Math.abs(pt[0] - Th); if (d < bestDist) { bestDist = d; best = pt; bestPhase = 'ice'; } }
-    for (const pt of liq) { const d = Math.abs(pt[0] - Th); if (d < bestDist) { bestDist = d; best = pt; bestPhase = 'liquid'; } }
-    for (const pt of stm) { const d = Math.abs(pt[0] - Th); if (d < bestDist) { bestDist = d; best = pt; bestPhase = 'steam'; } }
+    const Th = Tmin + ((p.x - PL) / PW) * (Tmax - Tmin);
+    let best = null,
+      bestDist = Infinity,
+      bestPhase = null;
+    for (const pt of ice) {
+      const d = Math.abs(pt[0] - Th);
+      if (d < bestDist) {
+        bestDist = d;
+        best = pt;
+        bestPhase = "ice";
+      }
+    }
+    for (const pt of liq) {
+      const d = Math.abs(pt[0] - Th);
+      if (d < bestDist) {
+        bestDist = d;
+        best = pt;
+        bestPhase = "liquid";
+      }
+    }
+    for (const pt of stm) {
+      const d = Math.abs(pt[0] - Th);
+      if (d < bestDist) {
+        bestDist = d;
+        best = pt;
+        bestPhase = "steam";
+      }
+    }
     if (!best) return;
     setHover({ T: best[0], v: best[1], phase: bestPhase });
   }
 
-  function onLeave() { setHover(null); }
+  function onLeave() {
+    setHover(null);
+  }
 
   // Tooltip positioning (in wrap coordinates)
   let tooltip = null;
+
   if (hover && wrapRef.current && svgRef.current) {
     const svg = svgRef.current;
     const wrap = wrapRef.current;
+
     const wrapRect = wrap.getBoundingClientRect();
     const svgRect = svg.getBoundingClientRect();
-    const x = tx(hover.T);
-    const y = ty(hover.v);
-    const sx = svgRect.left + (x / W) * svgRect.width;
-    const sy = svgRect.top + (y / H) * svgRect.height;
+
+    const hoverX = hover ? tx(hover.T) : 0;
+    const hoverY = hover ? ty(hover.v) : 0;
+
+    // позиція точки в екрані
+    const sx = svgRect.left + (hoverX / W) * svgRect.width;
+    const sy = svgRect.top + (hoverY / H) * svgRect.height;
+
+    // === X позиціонування ===
     let left = sx - wrapRect.left;
-    let top = sy - wrapRect.top;
+
     const halfW = 80;
-    const minL = halfW + 4, maxL = wrapRect.width - halfW - 4;
+    const minL = halfW + 4;
+    const maxL = wrapRect.width - halfW - 4;
+
     if (left < minL) left = minL;
     if (left > maxL) left = maxL;
-    if (top < 70) top = 70;
-    const phaseKey = hover.phase === 'steam' ? 'phase.steam' : hover.phase === 'ice' ? 'phase.ice' : 'phase.water';
+
+    // === Y позиціонування (верх / низ) ===
+    const TOOLTIP_H = 10;
+    const GAP = 10;
+
+    const y = sy - wrapRect.top;
+
+    // пробуємо зверху
+    let top = y - 2 * TOOLTIP_H - GAP;
+
+    // якщо не влазить зверху — показуємо знизу
+    if (top < 0) {
+      top = y + 10 * GAP;
+    }
+
+    // якщо вилітає вниз — обмежуємо
+    const maxTop = wrapRect.height - TOOLTIP_H;
+    if (top > maxTop) {
+      top = maxTop;
+    }
+
+    const phaseKey =
+      hover.phase === "steam"
+        ? "phase.steam"
+        : hover.phase === "ice"
+          ? "phase.ice"
+          : "phase.water";
+
     tooltip = { left, top, phaseKey };
   }
 
@@ -200,64 +324,88 @@ export default function Chart({ result, thermo }) {
     const svg = svgRef.current;
     if (!svg) return;
     const clone = svg.cloneNode(true);
-    const srcEls = [svg, ...svg.querySelectorAll('*')];
-    const dstEls = [clone, ...clone.querySelectorAll('*')];
+    const srcEls = [svg, ...svg.querySelectorAll("*")];
+    const dstEls = [clone, ...clone.querySelectorAll("*")];
     const props = [
-      'fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-opacity',
-      'fill-opacity', 'opacity', 'font-family', 'font-size', 'font-weight', 'text-anchor',
+      "fill",
+      "stroke",
+      "stroke-width",
+      "stroke-dasharray",
+      "stroke-opacity",
+      "fill-opacity",
+      "opacity",
+      "font-family",
+      "font-size",
+      "font-weight",
+      "text-anchor",
     ];
     for (let i = 0; i < srcEls.length; i++) {
       const cs = getComputedStyle(srcEls[i]);
-      let style = '';
+      let style = "";
       for (const p of props) {
         const v = cs.getPropertyValue(p);
         if (v) style += `${p}:${v};`;
       }
-      dstEls[i].setAttribute('style', style);
+      dstEls[i].setAttribute("style", style);
     }
-    clone.querySelectorAll('.chart-hover, .chart-overlay').forEach((el) => el.remove());
+    clone
+      .querySelectorAll(".chart-hover, .chart-overlay")
+      .forEach((el) => el.remove());
 
     const bodyCs = getComputedStyle(document.body);
-    const bg = (bodyCs.getPropertyValue('--surface') || bodyCs.backgroundColor || '#ffffff').trim() || '#ffffff';
+    const bg =
+      (
+        bodyCs.getPropertyValue("--surface") ||
+        bodyCs.backgroundColor ||
+        "#ffffff"
+      ).trim() || "#ffffff";
 
     const scale = 2;
-    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    clone.setAttribute('width',  W * scale);
-    clone.setAttribute('height', H * scale);
-    clone.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.setAttribute("width", W * scale);
+    clone.setAttribute("height", H * scale);
+    clone.setAttribute("viewBox", `0 0 ${W} ${H}`);
 
-    const SVG_NS = 'http://www.w3.org/2000/svg';
-    const bgRect = document.createElementNS(SVG_NS, 'rect');
-    bgRect.setAttribute('x', 0); bgRect.setAttribute('y', 0);
-    bgRect.setAttribute('width', W); bgRect.setAttribute('height', H);
-    bgRect.setAttribute('fill', bg);
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const bgRect = document.createElementNS(SVG_NS, "rect");
+    bgRect.setAttribute("x", 0);
+    bgRect.setAttribute("y", 0);
+    bgRect.setAttribute("width", W);
+    bgRect.setAttribute("height", H);
+    bgRect.setAttribute("fill", bg);
     clone.insertBefore(bgRect, clone.firstChild);
 
     const xml = new XMLSerializer().serializeToString(clone);
-    const svgBlob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n', xml], { type: 'image/svg+xml;charset=utf-8' });
+    const svgBlob = new Blob(
+      ['<?xml version="1.0" encoding="UTF-8"?>\n', xml],
+      { type: "image/svg+xml;charset=utf-8" },
+    );
     const url = URL.createObjectURL(svgBlob);
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = W * scale;
       canvas.height = H * scale;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, W * scale, H * scale);
       URL.revokeObjectURL(url);
       canvas.toBlob((blob) => {
         if (!blob) return;
-        const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        const stamp = new Date()
+          .toISOString()
+          .replace(/[:.]/g, "-")
+          .slice(0, 19);
         const fname = `H2O_${propKey}_${pMPa.toFixed(3)}MPa_${stamp}.png`;
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
         a.download = fname;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-      }, 'image/png');
+      }, "image/png");
     };
     img.onerror = () => URL.revokeObjectURL(url);
     img.src = url;
@@ -265,14 +413,20 @@ export default function Chart({ result, thermo }) {
 
   const hoverX = hover ? tx(hover.T) : 0;
   const hoverY = hover ? ty(hover.v) : 0;
-  const hoverDotClass = hover ? `chart-hover-dot ${hover.phase}` : 'chart-hover-dot';
+  const hoverDotClass = hover
+    ? `chart-hover-dot ${hover.phase}`
+    : "chart-hover-dot";
+
+  function labelY(preferredY, fallbackY) {
+    return preferredY < 8 ? fallbackY : preferredY;
+  }
 
   return (
-    <div className="chart-section" style={{ display: 'block' }}>
+    <div className="chart-section" style={{ display: "block" }}>
       <div className="chart-head">
-        <h3 className="chart-title">{t('chart.title')}</h3>
+        <h3 className="chart-title">{t("chart.title")}</h3>
         <div className="chart-controls">
-          <label htmlFor="chartPropSelect">{t('chart.propLabel')}</label>
+          <label htmlFor="chartPropSelect">{t("chart.propLabel")}</label>
           <select
             id="chartPropSelect"
             className="chart-select"
@@ -280,15 +434,16 @@ export default function Chart({ result, thermo }) {
             onChange={(e) => setPropKey(e.target.value)}
           >
             {CHART_PROPS.map((p) => (
-              <option key={p.key} value={p.key}>{p.sym} — {t(p.tkey)}</option>
+              <option key={p.key} value={p.key}>
+                {p.sym} — {t(p.tkey)}
+              </option>
             ))}
           </select>
           <button type="button" className="chart-btn" onClick={exportPng}>
-            {t('chart.exportPng')}
+            {t("chart.exportPng")}
           </button>
         </div>
       </div>
-
       <div className="chart-wrap" ref={wrapRef}>
         <svg
           ref={svgRef}
@@ -301,8 +456,21 @@ export default function Chart({ result, thermo }) {
             const x = tx(v).toFixed(1);
             return (
               <g key={`x${v}`}>
-                <line x1={x} y1={PT} x2={x} y2={PT + PH} className="chart-grid" />
-                <text x={x} y={PT + PH + 16} className="chart-tick" textAnchor="middle">{v}</text>
+                <line
+                  x1={x}
+                  y1={PT}
+                  x2={x}
+                  y2={PT + PH}
+                  className="chart-grid"
+                />
+                <text
+                  x={x}
+                  y={PT + PH + 16}
+                  className="chart-tick"
+                  textAnchor="middle"
+                >
+                  {v}
+                </text>
               </g>
             );
           })}
@@ -310,35 +478,110 @@ export default function Chart({ result, thermo }) {
             const y = ty(v).toFixed(1);
             return (
               <g key={`y${i}`}>
-                <line x1={PL} y1={y} x2={PL + PW} y2={y} className="chart-grid" />
-                <text x={PL - 6} y={Number(y) + 3} className="chart-tick" textAnchor="end">{fmtTick(v)}</text>
+                <line
+                  x1={PL}
+                  y1={y}
+                  x2={PL + PW}
+                  y2={y}
+                  className="chart-grid"
+                />
+                <text
+                  x={PL}
+                  y={Number(y) + 3}
+                  className="chart-tick"
+                  textAnchor="end"
+                >
+                  {fmtTick(v)}
+                </text>
               </g>
             );
           })}
           {Tsat >= Tmin && Tsat <= Tmax && (
             <>
-              <line x1={tx(Tsat).toFixed(1)} y1={PT} x2={tx(Tsat).toFixed(1)} y2={PT + PH} className="chart-tsat" />
-              <text x={tx(Tsat).toFixed(1)} y={PT - 6} className="chart-tsat-label" textAnchor="middle">
+              <line
+                x1={tx(Tsat).toFixed(1)}
+                y1={PT}
+                x2={tx(Tsat).toFixed(1)}
+                y2={PT + PH}
+                className="chart-tsat"
+              />
+              <text
+                x={tx(Tsat).toFixed(1)}
+                y={PT - 6}
+                className="chart-tsat-label"
+                textAnchor="middle"
+              >
                 Tₛ {Tsat.toFixed(1)}°C
               </text>
             </>
           )}
-          {curT >= Tmin && curT <= Tmax && (
-            <line x1={tx(curT).toFixed(1)} y1={PT} x2={tx(curT).toFixed(1)} y2={PT + PH} className="chart-cur" />
-          )}
-          {ice.length > 1 && <path d={pathFor(ice, ty)} className="chart-ice" />}
-          {liq.length > 1 && <path d={pathFor(liq, ty)} className="chart-liquid" />}
-          {stm.length > 1 && <path d={pathFor(stm, ty)} className="chart-steam" />}
-          <text x={PL + PW / 2} y={H - 8} className="chart-axis" textAnchor="middle">T, °C</text>
-          <text x={PL} y={PT - 8} className="chart-axis">{ylab}</text>
 
-          <g className="chart-hover" style={{ display: hover ? '' : 'none' }}>
-            <line className="chart-hover-line" x1={hoverX} y1={PT} x2={hoverX} y2={PT + PH} />
+          {Tmelt >= Tmin && Tmelt <= Tmax && (
+            <>
+              <line
+                x1={tx(Tmelt)}
+                y1={PT}
+                x2={tx(Tmelt)}
+                y2={PT + PH}
+                className="chart-tmelt"
+              />
+              <text
+                x={tx(Tmelt)}
+                y={PT - 6} // ✅ всередині графіка
+                className="chart-tmelt-label"
+                textAnchor="middle"
+              >
+                Tₘ {Tmelt.toFixed(1)} °C
+              </text>
+            </>
+          )}
+
+          {curT >= Tmin && curT <= Tmax && (
+            <line
+              x1={tx(curT).toFixed(1)}
+              y1={PT}
+              x2={tx(curT).toFixed(1)}
+              y2={PT + PH}
+              className="chart-cur"
+            />
+          )}
+          {ice.length > 1 && (
+            <path d={pathFor(ice, ty)} className="chart-ice" />
+          )}
+          {liq.length > 1 && (
+            <path d={pathFor(liq, ty)} className="chart-liquid" />
+          )}
+          {stm.length > 1 && (
+            <path d={pathFor(stm, ty)} className="chart-steam" />
+          )}
+          <text
+            x={PL + PW / 2}
+            y={H - 8}
+            className="chart-axis"
+            textAnchor="middle"
+          >
+            T, °C
+          </text>
+          <text x={PL - 30} y={PT - 10} className="chart-axis">
+            {ylab}
+          </text>
+
+          <g className="chart-hover" style={{ display: hover ? "" : "none" }}>
+            <line
+              className="chart-hover-line"
+              x1={hoverX}
+              y1={PT}
+              x2={hoverX}
+              y2={PT + PH}
+            />
             <circle className={hoverDotClass} cx={hoverX} cy={hoverY} r="4" />
           </g>
           <rect
             className="chart-overlay"
-            x={PL} y={PT} width={PW} height={PH}
+            x={PL}
+            y={PT}
+            width={PW}
+            height={PH}
             fill="transparent"
             onMouseMove={onMove}
             onMouseLeave={onLeave}
@@ -348,9 +591,13 @@ export default function Chart({ result, thermo }) {
           />
         </svg>
         <div
-          className={`chart-tooltip${hover ? ' visible' : ''}`}
+          className={`chart-tooltip${hover ? " visible" : ""}`}
           role="tooltip"
-          style={tooltip ? { left: tooltip.left + 'px', top: tooltip.top + 'px' } : undefined}
+          style={
+            tooltip
+              ? { left: tooltip.left + "px", top: tooltip.top + "px" }
+              : undefined
+          }
         >
           {hover && (
             <>
@@ -364,19 +611,43 @@ export default function Chart({ result, thermo }) {
                 <span className="ct-val">{fmtTooltipVal(hover.v)}</span>
                 <span className="ct-unit">{t(meta.ukey)}</span>
               </div>
-              <div className={`ct-phase ${hover.phase}`}>{t(tooltip.phaseKey)}</div>
+              <div className={`ct-phase ${hover.phase}`}>
+                {t(tooltip.phaseKey)}
+              </div>
             </>
           )}
         </div>
       </div>
-
       <div className="chart-legend">
-        <span className="cl-item"><span className="cl-sw cl-liq" /><span>{t('chart.legendLiquid')}</span></span>
-        <span className="cl-item"><span className="cl-sw cl-ice" /><span>{t('chart.legendIce')}</span></span>
-        <span className="cl-item"><span className="cl-sw cl-stm" /><span>{t('chart.legendSteam')}</span></span>
-        <span className="cl-item"><span className="cl-sw cl-tsat" /><span>{t('chart.legendTsat')}</span></span>
-        <span className="cl-item"><span className="cl-sw cl-cur" /><span>{t('chart.legendCurrent')}</span></span>
+        <span className="cl-item">
+          <span className={`cl-sw ${isSinglePhase ? "cl-gas" : "cl-liq"}`} />
+          <span>
+            {isSinglePhase ? t("phase.gas") : t("chart.legendLiquid")}
+          </span>
+        </span>
+
+        {!isSinglePhase && (
+          <>
+            <span className="cl-item">
+              <span className="cl-sw cl-ice" />
+              <span>{t("chart.legendIce")}</span>
+            </span>
+            <span className="cl-item">
+              <span className="cl-sw cl-stm" />
+              <span>{t("chart.legendSteam")}</span>
+            </span>
+            <span className="cl-item">
+              <span className="cl-sw cl-tsat" />
+              <span>{t("chart.legendTsat")}</span>
+            </span>
+            <span className="cl-item">
+              <span className="cl-sw cl-tmelt" />
+              <span>{t("chart.legendTmelt")}</span>
+            </span>
+          </>
+        )}
       </div>
+      ``
     </div>
   );
 }

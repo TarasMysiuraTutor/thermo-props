@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import { HashRouter  } from "react-router-dom";
 import App from "./App.jsx";
 import { I18nProvider } from "./i18n.jsx";
-import "./styles.css";
+// import "./styles.css";
+import './styles/index.css';
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

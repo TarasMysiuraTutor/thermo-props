@@ -1,0 +1,145 @@
+/* ─────────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeUp 0.4s ease both;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE — TABLET (≤ 768px)
+───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero {
+    padding: 36px 0 32px;
+  }
+
+  .hero-desc {
+    font-size: 15px;
+  }
+
+  .props-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .input-card {
+    padding: 22px 20px 20px;
+  }
+
+  .header-badge {
+    display: none;
+  }
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE — MOBILE (≤ 540px)
+───────────────────────────────────────── */
+@media (max-width: 540px) {
+  .header-inner {
+    padding: 14px 16px;
+  }
+  .logo-sub {
+    display: none;
+  }
+
+  .hero {
+    padding: 28px 0 24px;
+  }
+  .hero h1 {
+    font-size: 26px;
+  }
+  .hero-desc {
+    font-size: 14px;
+  }
+
+  .container {
+    padding: 0 14px;
+  }
+
+  .input-card {
+    padding: 18px 16px 16px;
+    margin-bottom: 20px;
+  }
+
+  /* Stack input row vertically on mobile */
+  .input-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .temp-input {
+    height: 60px;
+    font-size: 28px;
+  }
+
+  .unit-toggle {
+    height: 52px;
+    width: 100%;
+  }
+
+  .unit-btn {
+    font-size: 26px;
+    padding: 0 12px;
+    flex: 1;
+  }
+
+  .btn-calc {
+    height: 52px;
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .range-note {
+    font-size: 14px;
+  }
+
+  .props-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .prop-cell {
+    padding: 15px 14px 13px;
+  }
+  .prop-value {
+    font-size: 17px;
+  }
+  .prop-name {
+    font-size: 14px;
+  }
+  .prop-symbol {
+    font-size: 14px;
+  }
+
+  .results-temp {
+    font-size: 22px;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .footer-note:last-child {
+    display: none;
+  }
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE — TINY (≤ 360px)
+───────────────────────────────────────── */
+@media (max-width: 360px) {
+  .props-grid {
+    grid-template-columns: 1fr;
+  }
+}

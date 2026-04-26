@@ -1,0 +1,102 @@
+/* ─────────────────────────────────────────
+   ЗМІННІ
+───────────────────────────────────────── */
+:root {
+  --bg: #0f1117;
+  --surface: #181c27;
+  --surface-2: #1f2438;
+  --border: #2a3050;
+  --border-lt: #3a4468;
+
+  --text-1: #ffffff;
+  --text-2: #c8cdd8;
+  --text-3: #7a8299;
+  --text-4: #4a5170;
+
+  --blue: #4a90ff;
+  --blue-dark: #2563eb;
+  --blue-bg: rgba(74, 144, 255, 0.12);
+  --blue-border: rgba(74, 144, 255, 0.3);
+
+  --teal: #34d399;
+  --teal-bg: rgba(52, 211, 153, 0.1);
+
+  --amber: #fbbf24;
+  --amber-bg: rgba(251, 191, 36, 0.1);
+
+  --red: #f87171;
+  --red-bg: rgba(248, 113, 113, 0.1);
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+
+  --ff-body: "Outfit", system-ui, sans-serif;
+  --ff-mono: "DM Mono", monospace;
+
+  --switch-bg: rgba(255, 255, 255, 0.06);
+  --switch-border: rgba(255, 255, 255, 0.12);
+  --switch-active: rgba(255, 255, 255, 0.14);
+  --accent: var(--blue);
+  color-scheme: dark;
+}
+
+/* ── Light theme ── */
+[data-theme="light"] {
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --border: #d8dee8;
+  --border-lt: #c4ccd8;
+
+  --text-1: #0f1117;
+  --text-2: #2d3548;
+  --text-3: #6b7388;
+  --text-4: #9aa1b3;
+
+  --shadow: 0 4px 20px rgba(15, 17, 23, 0.08);
+  --shadow-sm: 0 2px 6px rgba(15, 17, 23, 0.05);
+
+  --blue-bg: rgba(74, 144, 255, 0.1);
+  --blue-border: rgba(74, 144, 255, 0.4);
+  --teal-bg: rgba(52, 211, 153, 0.12);
+  --amber-bg: rgba(251, 191, 36, 0.14);
+  --red-bg: rgba(248, 113, 113, 0.1);
+
+  --switch-bg: rgba(15, 17, 23, 0.05);
+  --switch-border: rgba(15, 17, 23, 0.1);
+  --switch-active: rgba(74, 144, 255, 0.14);
+  color-scheme: light;
+}
+
+/* ── Auto: follow system preference ── */
+@media (prefers-color-scheme: light) {
+  [data-theme="auto"] {
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --surface-2: #eef2f8;
+    --border: #d8dee8;
+    --border-lt: #c4ccd8;
+
+    --text-1: #0f1117;
+    --text-2: #2d3548;
+    --text-3: #6b7388;
+    --text-4: #9aa1b3;
+
+    --shadow: 0 4px 20px rgba(15, 17, 23, 0.08);
+    --shadow-sm: 0 2px 6px rgba(15, 17, 23, 0.05);
+
+    --blue-bg: rgba(74, 144, 255, 0.1);
+    --blue-border: rgba(74, 144, 255, 0.4);
+    --teal-bg: rgba(52, 211, 153, 0.12);
+    --amber-bg: rgba(251, 191, 36, 0.14);
+    --red-bg: rgba(248, 113, 113, 0.1);
+
+    --switch-bg: rgba(15, 17, 23, 0.05);
+    --switch-border: rgba(15, 17, 23, 0.1);
+    --switch-active: rgba(74, 144, 255, 0.14);
+    color-scheme: light;
+  }
+}
+

@@ -25,8 +25,10 @@ const dict = {
     "input.pressureLabel": "Тиск",
     "input.unitsLabel": "Одиниці",
     "input.calcBtn": "Розрахувати",
-    "input.rangeNote":
-      "Допустимі діапазони: <b>0 — 800 °C</b> &ensp;·&ensp; <b>0.001 — 100 МПа</b> &ensp;·&ensp; авто: рідина / пара",
+    "input.range.water":
+      "Допустимі діапазони: <b>-100 — 800 °C</b> &ensp;·&ensp; <b>0.001 — 100 МПа</b> &ensp;·&ensp; авто: лід / рідина / пара",
+    "input.range.air":
+      "Допустимі діапазони: <b>0 – 800 °C</b>&ensp;·&ensp; <b>0.001 – 100 МПа</b>",
     "err.outOfPressure":
       "Тиск {val} виходить за межі допустимого діапазону (0.001 — 100 МПа).",
     "results.pressureLabel": "Тиск",
@@ -47,11 +49,15 @@ const dict = {
     "chart.legendLiquid": "рідка вода",
     "chart.legendSteam": "перегріта пара",
     "chart.legendTsat": "T насичення",
+    "chart.legendTmelt": "T замерзання",
     "chart.legendCurrent": "поточна T",
     "chart.exportPng": "Завантажити PNG",
     "chart.legendIce": "лід",
+    "chart.singlePhaseNote":
+      "Графік фазових залежностей не будується для однофазних газів у поточній моделі.",
     "phase.water": "Рідка вода",
     "phase.steam": "Перегріта пара",
+    "phase.ice": "Лід",
     "phase.gas": "Газ",
     "err.notNumber": "Будь ласка, введіть числове значення температури.",
     "err.outOfRange":
@@ -119,8 +125,11 @@ const dict = {
     "input.pressureLabel": "Pressure",
     "input.unitsLabel": "Units",
     "input.calcBtn": "Calculate",
-    "input.rangeNote":
-      "Valid ranges: <b>0 — 800 °C</b> &ensp;·&ensp; <b>0.001 — 100 MPa</b> &ensp;·&ensp; auto: liquid / steam",
+    "input.range.water":
+      "Valid ranges: <b>-100 — 800 °C</b> &ensp;·&ensp; <b>0.001 — 100 MPa</b> &ensp;·&ensp; auto: ice / liquid / steam",
+    "input.range.air":
+      "Valid ranges: <b>0 – 800 °C</b>&ensp;·&ensp; <b>0.001 – 100 MPa</b>",
+
     "err.outOfPressure":
       "Pressure {val} is outside the allowed range (0.001 — 100 MPa).",
     "results.pressureLabel": "Pressure",
@@ -141,9 +150,12 @@ const dict = {
     "chart.legendLiquid": "liquid water",
     "chart.legendSteam": "superheated steam",
     "chart.legendTsat": "saturation T",
+    "chart.legendTmelt": "melting T",
     "chart.legendCurrent": "current T",
     "chart.exportPng": "Download PNG",
     "chart.legendIce": "ice",
+    "chart.singlePhaseNote":
+      "Phase-dependent charts are not displayed for single-phase gases in the current model.",
     "phase.water": "Liquid water",
     "phase.steam": "Superheated steam",
     "phase.ice": "Ice",
@@ -213,8 +225,10 @@ const dict = {
     "input.pressureLabel": "Ciśnienie",
     "input.unitsLabel": "Jednostki",
     "input.calcBtn": "Oblicz",
-    "input.rangeNote":
-      "Dopuszczalne zakresy: <b>0 — 800 °C</b> &ensp;·&ensp; <b>0,001 — 100 MPa</b> &ensp;·&ensp; auto: ciecz / para",
+    "input.range.water":
+      "Dopuszczalne zakresy: <b>-100 — 800 °C</b> &ensp;·&ensp; <b>0.001 — 100 MPa</b> &ensp;·&ensp; авто: Lód / ciecz / para",
+    "input.range.air":
+      "Dopuszczalne zakresy: <b>0 – 800 °C</b>&ensp;·&ensp; <b>0,001 – 100 MPa</b>",
     "err.outOfPressure":
       "Ciśnienie {val} wykracza poza dopuszczalny zakres (0,001 — 100 MPa).",
     "results.pressureLabel": "Ciśnienie",
@@ -235,9 +249,12 @@ const dict = {
     "chart.legendLiquid": "woda ciekła",
     "chart.legendSteam": "para przegrzana",
     "chart.legendTsat": "T nasycenia",
+    "chart.legendTmelt": "T topnienia",
     "chart.legendCurrent": "aktualna T",
     "chart.exportPng": "Pobierz PNG",
     "chart.legendIce": "lód",
+    "chart.singlePhaseNote":
+      "Wykres fazy nie jest wyświetlany dla jednofazowych gazów w obecnym modelu.",
     "phase.water": "Woda ciekła",
     "phase.steam": "Para przegrzana",
     "phase.ice": "Lód",
@@ -308,8 +325,10 @@ const dict = {
     "input.pressureLabel": "Druck",
     "input.unitsLabel": "Einheiten",
     "input.calcBtn": "Berechnen",
-    "input.rangeNote":
-      "Zulässige Bereiche: <b>0 — 800 °C</b> &ensp;·&ensp; <b>0,001 — 100 MPa</b> &ensp;·&ensp; auto: Flüssigkeit / Dampf",
+    "input.range.water":
+      "Zulässige Bereiche: <b>-100 — 800 °C</b> &ensp;·&ensp; <b>0.001 — 100 MPa</b> &ensp;·&ensp; авто: Eis / Flüssigkeit / Dampf",
+    "input.range.air":
+      "Zulässige Bereiche: <b>0 – 800 °C</b>&ensp;·&ensp; <b>0,001 – 100 MPa</b>",
     "err.outOfPressure":
       "Druck {val} liegt außerhalb des zulässigen Bereichs (0,001 — 100 MPa).",
     "results.pressureLabel": "Druck",
@@ -330,9 +349,12 @@ const dict = {
     "chart.legendLiquid": "flüssiges Wasser",
     "chart.legendSteam": "überhitzter Dampf",
     "chart.legendTsat": "Sättigungs-T",
+    "chart.legendTmelt": "Schmelz-T",
     "chart.legendCurrent": "aktuelle T",
     "chart.exportPng": "PNG herunterladen",
     "chart.legendIce": "Eis",
+    "chart.singlePhaseNote":
+      "Phasenabhängige Diagramme werden für einphasige Gase im aktuellen Modell nicht angezeigt.",
     "phase.water": "Flüssiges Wasser",
     "phase.steam": "Überhitzter Dampf",
     "phase.ice": "Eis",
