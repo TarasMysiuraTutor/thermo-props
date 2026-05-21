@@ -33,6 +33,23 @@ export default function Results({ result, onPickTemperatureC, thermo }) {
   const tmelt = thermo.meltingTemp(pMPa);
   const props = thermo.getProperties(T, pMPa, t);
 
+  const Ts = thermo.saturationTemp?.(pMPa);
+  const isAtSaturation = Ts != null && Math.abs(T - Ts) < 0.1; // допуск 0.1 °C
+
+  if (
+    substance.id === "water" &&
+    isAtSaturation &&
+    thermo.latentHeatVaporization
+  ) {
+    props.push({
+      id: "hfg",
+      symbol: "h_fg",
+      name: t("prop.hfg"),
+      value: thermo.latentHeatVaporization(pMPa).toFixed(0),
+      unit: t("unit.hfg"),
+    });
+  }
+
   return (
     <section
       ref={sectionRef}

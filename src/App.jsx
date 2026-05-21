@@ -22,6 +22,8 @@ import ukAir from "./content/uk/air.md?raw";
 import plAir from "./content/pl/air.md?raw";
 import deAir from "./content/de/air.md?raw";
 
+import { useThermoCalc } from "./hooks/useThermoCalc";
+
 import { substances, DEFAULT_SUBSTANCE_ID } from "./substances";
 
 const HISTORY_KEY = "h2o.history";
@@ -60,13 +62,7 @@ function AppContent({ substanceId }) {
     contentBySubstance[substanceId]?.[lang] ??
     contentBySubstance[substanceId]?.en;
 
-  const [tempValue, setTempValue] = useState("");
-  const [tempUnit, setTempUnit] = useState("C");
-  const [pressureValue, setPressureValue] = useState("");
-  const [pressureUnit, setPressureUnit] = useState("MPa");
-  const [error, setError] = useState("");
-  const [result, setResult] = useState(null);
-  const [history, setHistory] = useState(() => loadHistory());
+  const calc = useThermoCalc(thermo);
 
   useEffect(() => {
     try {
@@ -74,137 +70,19 @@ function AppContent({ substanceId }) {
     } catch (_) {}
   }, [history]);
 
-  const calculate = useCallback(() => {
-    setError("");
-    const raw = parseFloat(String(tempValue).replace(",", "."));
-    if (isNaN(raw)) {
-      setError(t("err.notNumber"));
-      return;
-    }
-
-    let pRawStr = String(pressureValue).trim().replace(",", ".");
-    let pRaw = pRawStr === "" ? null : parseFloat(pRawStr);
-    let pMPa;
-    if (pRaw === null) {
-      pMPa = thermo.P_ATM_MPA;
-      pRaw = pMPa;
-    } else {
-      if (isNaN(pRaw)) {
-        setError(t("err.notNumber"));
-        return;
-      }
-      pMPa = thermo.toMPa(pRaw, pressureUnit);
-      if (pMPa < 0.001 || pMPa > 100) {
-        setError(t("err.outOfPressure", { val: pRaw + " " + pressureUnit }));
-        return;
-      }
-    }
-
-    const T = thermo.toCelsius(raw, tempUnit);
-    if (T < -100 || T > 800) {
-      const range =
-        tempUnit === "C"
-          ? "−100 – 800 °C"
-          : tempUnit === "K"
-            ? "173.15 – 1073.15 K"
-            : "−148 – 1472 °F";
-      setError(t("err.outOfRange", { val: raw, range }));
-      return;
-    }
-
-    const next = {
-      T,
-      raw,
-      pMPa,
-      pRaw,
-      pUnit: pressureUnit,
-      tempUnit,
-      token: Date.now(),
-    };
-    setResult(next);
-
-    setHistory((prev) => {
-      const filtered = prev.filter(
-        (e) =>
-          !(
-            e.raw === raw &&
-            e.unit === tempUnit &&
-            e.pRaw === pRaw &&
-            e.pUnit === pressureUnit
-          ),
-      );
-      const updated = [
-        {
-          raw,
-          unit: tempUnit,
-          T,
-          pRaw,
-          pUnit: pressureUnit,
-          pMPa,
-          ts: Date.now(),
-        },
-        ...filtered,
-      ];
-      return updated.slice(0, HISTORY_LIMIT);
-    });
-  }, [tempValue, tempUnit, pressureValue, pressureUnit, t, thermo]);
-
   const onPickTemperatureC = useCallback(
     (tC) => {
       let val = tC;
-      if (tempUnit === "K") val = tC + 273.15;
-      else if (tempUnit === "F") val = (tC * 9) / 5 + 32;
-      setTempValue(val.toFixed(2));
-      // Defer calculation so the state update is applied first.
-      setTimeout(() => {
-        // We can't call calculate() here directly because closures capture
-        // the previous tempValue — instead, push directly using the new value.
-        const raw = val;
-        const T = thermo.toCelsius(raw, tempUnit);
-        let pRawStr = String(pressureValue).trim().replace(",", ".");
-        let pRaw = pRawStr === "" ? null : parseFloat(pRawStr);
-        let pMPa;
-        if (pRaw === null) {
-          pMPa = thermo.P_ATM_MPA;
-          pRaw = pMPa;
-        } else {
-          pMPa = thermo.toMPa(pRaw, pressureUnit);
-        }
-        if (T < -100 || T > 800) return;
-        if (pMPa < 0.001 || pMPa > 100) return;
-        setResult({
-          T,
-          raw,
-          pMPa,
-          pRaw,
-          pUnit: pressureUnit,
-          tempUnit,
-          token: Date.now(),
-        });
-      }, 0);
+      if (calc.tempUnit === "K") val = tC + 273.15;
+      else if (calc.tempUnit === "F") val = (tC * 9) / 5 + 32;
+
+      calc.setTempValue(val.toFixed(2));
+      calc.calculate();
     },
-    [tempUnit, pressureUnit, pressureValue, thermo],
+    [calc],
   );
 
-  const onHistoryPick = useCallback((entry) => {
-    setTempUnit(entry.unit);
-    setTempValue(String(entry.raw));
-    if (entry.pRaw != null && entry.pUnit) {
-      setPressureUnit(entry.pUnit);
-      setPressureValue(String(entry.pRaw));
-    }
-    // Rebuild result directly using the entry's stored values.
-    const T = entry.T;
-    setResult({
-      T,
-      raw: entry.raw,
-      pMPa: entry.pMPa,
-      pRaw: entry.pRaw,
-      pUnit: entry.pUnit,
-      tempUnit: entry.unit,
-      token: Date.now(),
-    });
-  }, []);
+
 
   const onClearHistory = useCallback(() => setHistory([]), []);
 
@@ -221,34 +99,35 @@ function AppContent({ substanceId }) {
           {substanceContent && <MarkdownContent content={substanceContent} />}
 
           <InputCard
-            tempValue={tempValue}
-            onTempChange={setTempValue}
-            tempUnit={tempUnit}
-            onTempUnitChange={setTempUnit}
-            pressureValue={pressureValue}
-            onPressureChange={setPressureValue}
-            pressureUnit={pressureUnit}
-            onPressureUnitChange={setPressureUnit}
-            onCalculate={calculate}
-            error={error}
+            tempValue={calc.tempValue}
+            onTempChange={calc.setTempValue}
+            tempUnit={calc.tempUnit}
+            onTempUnitChange={calc.setTempUnit}
+            pressureValue={calc.pressureValue}
+            onPressureChange={calc.setPressureValue}
+            pressureUnit={calc.pressureUnit}
+            onPressureUnitChange={calc.setPressureUnit}
+            calcMode={calc.calcMode}
+            onCalcModeChange={calc.setCalcMode}
+            onCalculate={calc.calculate}
+            error={calc.error}
           />
 
-          <HistoryPanel
+          {/* <HistoryPanel
             entries={history}
             onPick={onHistoryPick}
             onClear={onClearHistory}
-          />
+          /> */}
 
-          {result && (
+          {calc.result && (
             <>
               <Results
-                result={result}
-                onPickTemperatureC={onPickTemperatureC}
+                result={calc.result}
                 thermo={thermo}
+                onPickTemperatureC={onPickTemperatureC}
               />
-              <Chart result={result} thermo={thermo} />
-
-              <ExportBar result={result} />
+              <Chart result={calc.result} thermo={thermo} />
+              <ExportBar result={calc.result} />
             </>
           )}
         </div>
